@@ -444,7 +444,9 @@ void main() async {
         .addHandler(router);
 
     // Porta do servidor (usa PORT do ambiente ou 8080 como padrão)
-    final port = int.parse(getEnv('PORT', '8080'));
+    final portStr = getEnv('PORT', '8080');
+    print('🔌 Porta configurada: $portStr');
+    final port = int.parse(portStr);
 
     // Escuta em TODAS as interfaces (0.0.0.0)
     final server = await io.serve(handler, '0.0.0.0', port);
