@@ -56,7 +56,9 @@ void main() async {
         username: getEnv('DB_USER'),
         password: getEnv('DB_PASSWORD'),
       ),
-      settings: const ConnectionSettings(sslMode: SslMode.disable),
+      settings: ConnectionSettings(
+        sslMode: SslMode.require, // SSL obrigatório para Render
+      ),
     );
 
     print('Conectado ao PostgreSQL!');
