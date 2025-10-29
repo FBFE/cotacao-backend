@@ -8,7 +8,11 @@ import 'package:shelf_router/shelf_router.dart';
 
 // Função auxiliar para pegar variáveis de ambiente
 String getEnv(String key, [String defaultValue = '']) {
-  return io_lib.Platform.environment[key] ?? defaultValue;
+  final value = io_lib.Platform.environment[key];
+  if (value == null || value.isEmpty) {
+    return defaultValue;
+  }
+  return value;
 }
 
 // Middleware CORS para permitir requisições de qualquer origem
@@ -48,13 +52,25 @@ void main() async {
     print('🚀 Iniciando servidor...');
     print('📝 Lendo variáveis de ambiente...');
 
+    final dbHost = getEnv('DB_HOST', 'localhost');
+    final dbPort = getEnv('DB_PORT', '5432');
+    final dbName = getEnv('DB_NAME', 'cotacao_db');
+    final dbUser = getEnv('DB_USER');
+    final dbPassword = getEnv('DB_PASSWORD');
+
+    print('🔌 Conectando ao PostgreSQL...');
+    print('   Host: $dbHost');
+    print('   Port: $dbPort');
+    print('   Database: $dbName');
+    print('   User: $dbUser');
+
     final conn = await Connection.open(
       Endpoint(
-        host: getEnv('DB_HOST', 'localhost'),
-        port: int.parse(getEnv('DB_PORT', '5432')),
-        database: getEnv('DB_NAME', 'cotacao_db'),
-        username: getEnv('DB_USER'),
-        password: getEnv('DB_PASSWORD'),
+        host: dbHost,
+        port: int.parse(dbPort),
+        database: dbName,
+        username: dbUser,
+        password: dbPassword,
       ),
       settings: ConnectionSettings(
         sslMode: SslMode.require, // SSL obrigatório para Render
