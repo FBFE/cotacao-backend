@@ -40,8 +40,17 @@ Middleware corsHeaders() {
 
 void main() async {
   try {
-    // Carregar variáveis de ambiente
-    final env = DotEnv(includePlatformEnvironment: true)..load();
+    // Carregar variáveis de ambiente (funciona com e sem arquivo .env)
+    final env = DotEnv(includePlatformEnvironment: true);
+
+    // Tenta carregar .env, mas não falha se não existir
+    try {
+      env.load();
+    } catch (e) {
+      print(
+        '⚠️ Arquivo .env não encontrado, usando variáveis de ambiente do sistema',
+      );
+    }
 
     final conn = await Connection.open(
       Endpoint(
