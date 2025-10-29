@@ -1,10 +1,15 @@
 import 'dart:convert';
+import 'dart:io' as io_lib;
 
-import 'package:dotenv/dotenv.dart';
 import 'package:postgres/postgres.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_router/shelf_router.dart';
+
+// Função auxiliar para pegar variáveis de ambiente
+String getEnv(String key, [String defaultValue = '']) {
+  return io_lib.Platform.environment[key] ?? defaultValue;
+}
 
 // Middleware CORS para permitir requisições de qualquer origem
 Middleware corsHeaders() {
@@ -40,29 +45,18 @@ Middleware corsHeaders() {
 
 void main() async {
   try {
-    // Carregar variáveis de ambiente (funciona com e sem arquivo .env)
-    final env = DotEnv(includePlatformEnvironment: true);
-
-    // Tenta carregar .env, mas não falha se não existir
-    try {
-      env.load();
-    } catch (e) {
-      print(
-        '⚠️ Arquivo .env não encontrado, usando variáveis de ambiente do sistema',
-      );
-    }
+    print('🚀 Iniciando servidor...');
+    print('📝 Lendo variáveis de ambiente...');
 
     final conn = await Connection.open(
       Endpoint(
-        host: env['DB_HOST']!,
-        port: int.parse(env['DB_PORT']!),
-        database: env['DB_NAME']!,
-        username: env['DB_USER'],
-        password: env['DB_PASSWORD'],
+        host: getEnv('DB_HOST', 'localhost'),
+        port: int.parse(getEnv('DB_PORT', '5432')),
+        database: getEnv('DB_NAME', 'cotacao_db'),
+        username: getEnv('DB_USER'),
+        password: getEnv('DB_PASSWORD'),
       ),
-      settings: const ConnectionSettings(
-        sslMode: SslMode.disable, // ou SslMode.require, etc.
-      ),
+      settings: const ConnectionSettings(sslMode: SslMode.disable),
     );
 
     print('Conectado ao PostgreSQL!');
@@ -432,7 +426,7 @@ void main() async {
         .addHandler(router);
 
     // Porta do servidor (usa PORT do ambiente ou 8080 como padrão)
-    final port = int.parse(env['PORT'] ?? '8080');
+    final port = int.parse(getEnv('PORT', '8080'));
 
     // Escuta em TODAS as interfaces (0.0.0.0)
     final server = await io.serve(handler, '0.0.0.0', port);
