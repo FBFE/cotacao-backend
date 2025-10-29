@@ -7,9 +7,14 @@ import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_router/shelf_router.dart';
 
 // Função auxiliar para pegar variáveis de ambiente
-String getEnv(String key, [String defaultValue = '']) {
+String getEnv(String key, [String? defaultValue]) {
   final value = io_lib.Platform.environment[key];
   if (value == null || value.isEmpty) {
+    if (defaultValue == null || defaultValue.isEmpty) {
+      throw Exception(
+        'Variável de ambiente $key não encontrada e nenhum valor padrão foi fornecido!',
+      );
+    }
     return defaultValue;
   }
   return value;
@@ -67,7 +72,7 @@ void main() async {
     final conn = await Connection.open(
       Endpoint(
         host: dbHost,
-        port: int.parse(dbPort),
+        port: int.tryParse(dbPort) ?? 5432,
         database: dbName,
         username: dbUser,
         password: dbPassword,
@@ -446,7 +451,10 @@ void main() async {
     // Porta do servidor (usa PORT do ambiente ou 8080 como padrão)
     final portStr = getEnv('PORT', '8080');
     print('🔌 Porta configurada: $portStr');
-    final port = int.parse(portStr);
+
+    // Valida se a porta é um número válido
+    final port = int.tryParse(portStr) ?? 8080;
+    print('🔢 Porta parseada: $port');
 
     // Escuta em TODAS as interfaces (0.0.0.0)
     final server = await io.serve(handler, '0.0.0.0', port);
