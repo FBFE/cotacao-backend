@@ -121,6 +121,18 @@ void main() async {
 
     final router = Router();
 
+    // ========== HEALTH CHECK ==========
+    router.get('/', (Request req) {
+      return Response.ok(
+        jsonEncode({
+          'status': 'online',
+          'message': 'API de Cotações - Backend funcionando!',
+          'timestamp': DateTime.now().toIso8601String(),
+        }),
+        headers: {'Content-Type': 'application/json'},
+      );
+    });
+
     // ========== ENDPOINTS DE AUTENTICAÇÃO ==========
 
     // Registro de novo usuário
